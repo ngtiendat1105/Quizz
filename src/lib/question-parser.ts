@@ -33,16 +33,16 @@ function parseDifficulty(text: string): Difficulty {
 export function parseQuestionsFromText(rawText: string, sourceFile?: string): ParsedQuestion[] {
   const normalizedText = rawText
     .replace(/\r/g, "")
-    .replace(/\s+(?=(?:câu\s*)?\d+\s*[.)\-:])/gi, "\n")
+    .replace(/\s+(?=(?:(?:câu\s*)?\d{1,4}\s*[.)\-:]|(?:câu\s*)?\d{2,4}\s+(?=[A-ZÀ-ỴĐ])))/gi, "\n")
     .replace(/\s+(?=[A-D]\s*[.)\-:])/g, "\n")
     .replace(/\s+(?=(?:đáp\s*án|answer|correct answer)\s*[:\-])/gi, "\n")
     .replace(/\s+(?=(?:giải thích|explanation)\s*[:\-])/gi, "\n");
   const lines = normalizedText.split(/\n/).map(normalizeLine).filter(Boolean);
-  const starts = lines.map((line, index) => (/^(?:câu\s*)?\d+\s*[.)\-:]/i.test(line) ? index : -1)).filter((index) => index >= 0);
+  const starts = lines.map((line, index) => (/^(?:(?:câu\s*)?\d{1,4}\s*[.)\-:]|(?:câu\s*)?\d{2,4}\s+(?=[A-ZÀ-ỴĐ]))/i.test(line) ? index : -1)).filter((index) => index >= 0);
   const blocks = starts.map((start, index) => lines.slice(start, starts[index + 1] ?? lines.length));
 
   return blocks.map((block) => {
-    const first = block[0].replace(/^(?:câu\s*)?\d+\s*[.)\-:]\s*/i, "");
+    const first = block[0].replace(/^(?:(?:câu\s*)?\d{1,4}\s*[.)\-:]\s*|(?:câu\s*)?\d{2,4}\s+(?=[A-ZÀ-ỴĐ]))/i, "");
     const options: QuestionOption[] = [];
     const questionLines: string[] = [first];
     let correctAnswer: string[] = [];
