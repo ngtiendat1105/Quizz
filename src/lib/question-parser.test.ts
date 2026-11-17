@@ -10,4 +10,8 @@ describe("question parser", () => {
     const parsed = parseQuestionsFromText("1. Câu hỏi chưa có đáp án\nA. Một\nB. Hai");
     expect(parsed[0].correctAnswer).toEqual([]); expect(parsed[0].needsReview).toBe(true);
   });
+  it("recovers question boundaries from flattened PDF text", () => {
+    const parsed = parseQuestionsFromText("Câu 1: 2 + 2 bằng bao nhiêu? A. 3 B. 4 Đáp án: B Câu 2: 1 + 1 bằng bao nhiêu? A. 2 B. 3 Đáp án: A");
+    expect(parsed).toHaveLength(2); expect(parsed[0].correctAnswer).toEqual(["B"]); expect(parsed[1].correctAnswer).toEqual(["A"]);
+  });
 });
