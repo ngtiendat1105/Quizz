@@ -1,0 +1,13 @@
+import { describe, expect, it } from "vitest";
+import { parseQuestionsFromText } from "@/lib/question-parser";
+
+describe("question parser", () => {
+  it("parses questions, options, correct answers and explanations", () => {
+    const parsed = parseQuestionsFromText("Câu 1: Thủ đô Việt Nam là gì?\nA. Hà Nội\nB. Huế\nĐáp án: A\nGiải thích: Hà Nội là thủ đô.");
+    expect(parsed).toHaveLength(1); expect(parsed[0].options).toHaveLength(2); expect(parsed[0].correctAnswer).toEqual(["A"]); expect(parsed[0].explanation).toContain("Hà Nội"); expect(parsed[0].needsReview).toBe(false);
+  });
+  it("does not guess a missing answer", () => {
+    const parsed = parseQuestionsFromText("1. Câu hỏi chưa có đáp án\nA. Một\nB. Hai");
+    expect(parsed[0].correctAnswer).toEqual([]); expect(parsed[0].needsReview).toBe(true);
+  });
+});

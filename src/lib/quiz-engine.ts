@@ -1,0 +1,10 @@
+import type { Question } from "@/types";
+
+export interface QuizSettings { mode: "practice" | "exam"; shuffleQuestions: boolean; shuffleAnswers: boolean; showExplanation: boolean; timeLimit?: number; }
+export interface QuizQuestion { question: Question; options: Question["options"]; }
+export interface QuizSession { id: string; name: string; questions: QuizQuestion[]; settings: QuizSettings; answers: Record<string, string[]>; marked: string[]; startedAt: string; }
+
+export function shuffle<T>(items: T[]): T[] { const copy = [...items]; for (let index = copy.length - 1; index > 0; index -= 1) { const randomIndex = Math.floor(Math.random() * (index + 1)); [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]]; } return copy; }
+export function buildQuizSession(name: string, questions: Question[], settings: QuizSettings): QuizSession { const selected = settings.shuffleQuestions ? shuffle(questions) : [...questions]; return { id: `quiz-${Date.now()}`, name, questions: selected.map((question) => ({ question, options: settings.shuffleAnswers ? shuffle(question.options) : [...question.options] })), settings, answers: {}, marked: [], startedAt: new Date().toISOString() }; }
+export function answerIsCorrect(question: Question, answer: string[] | undefined): boolean { if (!answer || answer.length !== question.correctAnswer.length) return false; return [...answer].sort().join(",") === [...question.correctAnswer].sort().join(","); }
+export function calculateScore(session: QuizSession) { let correctAnswers = 0; let unanswered = 0; session.questions.forEach(({ question }) => { const answer = session.answers[question.id] ?? []; if (!answer.length) unanswered += 1; else if (answerIsCorrect(question, answer)) correctAnswers += 1; }); const totalQuestions = session.questions.length; return { totalQuestions, correctAnswers, wrongAnswers: totalQuestions - correctAnswers - unanswered, unanswered, score: totalQuestions ? Math.round((correctAnswers / totalQuestions) * 100) : 0 }; }
